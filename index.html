@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#071411">
+  <meta name="color-scheme" content="dark light">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="METAZOOA — descubre el animal del día por proximidad taxonómica y completa tu colección.">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <title>METAZOOA — Animal del día</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Navegación principal">
+      <div class="brand-block">
+        <div class="brand-mark" aria-hidden="true">M</div>
+        <div>
+          <div class="brand">METAZOOA</div>
+          <div class="brand-sub">Taxonomy discovery</div>
+        </div>
+      </div>
+      <nav class="desktop-nav" id="desktopNav">
+        <button class="nav-item is-active" data-view="game" type="button"><span>🏠</span><span>Jugar</span></button>
+        <button class="nav-item" data-view="pokedex" type="button"><span>📖</span><span>Pokédex</span></button>
+        <button class="nav-item" data-view="stats" type="button"><span>📊</span><span>Estadísticas</span></button>
+        <button class="nav-item" data-view="settings" type="button"><span>⚙️</span><span>Ajustes</span></button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="mini-status"><span class="status-dot"></span><span>Offline ready</span></div>
+        <span class="version-label">v1 · dataset 201</span>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="mobile-brand">
+          <div class="brand-mark" aria-hidden="true">M</div>
+          <div>
+            <div class="brand">METAZOOA</div>
+            <div class="brand-sub">Taxonomy discovery</div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="streak-pill" id="streakPill" title="Racha actual">🔥 <span id="streakValue">0</span></div>
+          <button class="icon-button" id="quickSettings" type="button" aria-label="Abrir ajustes">⚙</button>
+        </div>
+      </header>
+
+      <div id="clockWarning" class="banner warning is-hidden" role="status"></div>
+      <div id="toastRegion" class="toast-region" aria-live="polite" aria-atomic="true"></div>
+
+      <section class="view is-active" id="view-game" data-view-panel="game" aria-labelledby="gameTitle">
+        <div class="hero-grid">
+          <div class="card daily-card">
+            <div class="eyebrow">ANIMAL DEL DÍA</div>
+            <div class="daily-title-row">
+              <div>
+                <h1 id="gameTitle">¿Qué animal se esconde hoy?</h1>
+                <p class="muted">Cada intento te coloca en el árbol. Encuentra el ancestro común.</p>
+              </div>
+              <div class="difficulty-chip" id="dailyDifficulty">MEDIO</div>
+            </div>
+            <div class="countdown-wrap">
+              <span>Próximo animal</span>
+              <strong id="countdown">--:--:--</strong>
+            </div>
+          </div>
+
+          <div class="card progress-card">
+            <div class="eyebrow">COLECCIÓN</div>
+            <div class="collection-score"><strong id="collectionCount">0</strong><span>/ <span id="collectionTotal">0</span></span></div>
+            <div class="progress-track"><div class="progress-fill" id="collectionProgress" style="width:0%"></div></div>
+            <div class="progress-label"><span>Descubiertos</span><span id="collectionPercent">0%</span></div>
+            <div class="collection-mini-grid" id="collectionMini"></div>
+          </div>
+        </div>
+
+        <div class="card play-card" id="playCard">
+          <div class="section-heading">
+            <div>
+              <div class="eyebrow">ADIVINA</div>
+              <h2>Encuentra el animal secreto</h2>
+            </div>
+            <button class="ghost-button" id="hintButton" type="button">💡 Pista</button>
+          </div>
+
+          <div class="search-shell">
+            <label for="animalSearch" class="sr-only">Escribe un animal</label>
+            <div class="search-input-wrap">
+              <span class="search-icon" aria-hidden="true">⌕</span>
+              <input id="animalSearch" autocomplete="off" autocapitalize="none" spellcheck="false" inputmode="search" maxlength="80" placeholder="Busca por nombre común o científico…" aria-controls="searchSuggestions" aria-expanded="false">
+              <button class="clear-search is-hidden" id="clearSearch" type="button" aria-label="Limpiar búsqueda">×</button>
+            </div>
+            <div class="suggestions is-hidden" id="searchSuggestions" role="listbox" aria-label="Sugerencias de animales"></div>
+          </div>
+          <div class="search-helper" id="searchHelper">Puedes escribir sin tildes: <strong>leon</strong> → León.</div>
+
+          <button class="primary-button guess-button" id="guessButton" type="button" disabled>ADIVINAR</button>
+          <div class="hint-grid" id="hintGrid"></div>
+        </div>
+
+        <div class="section-heading history-heading">
+          <div>
+            <div class="eyebrow">HISTORIAL</div>
+            <h2>Tus intentos</h2>
+          </div>
+          <span class="history-count" id="historyCount">0 intentos</span>
+        </div>
+        <div id="historyList" class="history-list"></div>
+
+        <div id="completedDailyPanel" class="card completed-card is-hidden">
+          <div class="completed-visual">✓</div>
+          <div>
+            <div class="eyebrow">DÍA COMPLETADO</div>
+            <h2>Ya has descubierto el animal de hoy.</h2>
+            <p class="muted">Vuelve mañana para descubrir otro y mantener tu racha.</p>
+          </div>
+          <div class="completed-actions">
+            <button class="secondary-button" id="completedShareButton" type="button">↗ Compartir</button>
+            <button class="secondary-button" data-view-target="pokedex" type="button">📖 Ver Pokédex</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="view-pokedex" data-view-panel="pokedex" aria-labelledby="pokedexTitle">
+        <div class="page-heading">
+          <div>
+            <div class="eyebrow">COLECCIÓN</div>
+            <h1 id="pokedexTitle">Pokédex</h1>
+            <p class="muted">Cada intento válido desbloquea el animal en tu colección.</p>
+          </div>
+          <div class="collection-score compact"><strong id="pokedexUnlocked">0</strong><span>/ <span id="pokedexTotal">0</span></span></div>
+        </div>
+        <div class="tax-progress card" id="taxProgress"></div>
+        <div class="card pokedex-toolbar">
+          <div class="toolbar-search">
+            <label class="sr-only" for="pokedexSearch">Buscar en Pokédex</label>
+            <input id="pokedexSearch" type="search" placeholder="Buscar animal…" maxlength="80">
+          </div>
+          <select id="pokedexClassFilter" aria-label="Filtrar por clase">
+            <option value="all">Todas las clases</option>
+          </select>
+          <select id="pokedexRarityFilter" aria-label="Filtrar por rareza">
+            <option value="all">Todas las rarezas</option>
+          </select>
+          <select id="pokedexSort" aria-label="Ordenar Pokédex">
+            <option value="status">Estado</option>
+            <option value="name">Nombre</option>
+            <option value="family">Familia</option>
+            <option value="rarity">Rareza</option>
+            <option value="usage">Más usados</option>
+            <option value="recent">Más recientes</option>
+          </select>
+          <div class="view-toggle" role="group" aria-label="Vista de Pokédex">
+            <button class="toggle-button is-active" data-pokedex-view="grid" type="button" aria-label="Vista cuadrícula">▦</button>
+            <button class="toggle-button" data-pokedex-view="list" type="button" aria-label="Vista lista">☷</button>
+          </div>
+        </div>
+        <div id="pokedexRecent" class="recent-strip"></div>
+        <div id="pokedexGrid" class="pokedex-grid"></div>
+        <div id="pokedexEmpty" class="card empty-state is-hidden">
+          <div class="empty-icon">🔎</div>
+          <h2>No hay coincidencias</h2>
+          <p class="muted">Prueba otra búsqueda o cambia los filtros.</p>
+        </div>
+      </section>
+
+      <section class="view" id="view-stats" data-view-panel="stats" aria-labelledby="statsTitle">
+        <div class="page-heading">
+          <div>
+            <div class="eyebrow">SEGUIMIENTO</div>
+            <h1 id="statsTitle">Estadísticas</h1>
+            <p class="muted">Tu historial de descubrimientos y constancia diaria.</p>
+          </div>
+        </div>
+        <div class="stats-grid" id="statsGrid"></div>
+        <div class="two-column">
+          <div class="card">
+            <div class="section-heading"><div><div class="eyebrow">CLASES</div><h2>Progreso taxonómico</h2></div></div>
+            <div id="statsClasses" class="stats-class-list"></div>
+          </div>
+          <div class="card">
+            <div class="section-heading"><div><div class="eyebrow">USO</div><h2>Animales más utilizados</h2></div></div>
+            <div id="mostUsedList" class="most-used-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="view-settings" data-view-panel="settings" aria-labelledby="settingsTitle">
+        <div class="page-heading">
+          <div>
+            <div class="eyebrow">SISTEMA</div>
+            <h1 id="settingsTitle">Ajustes</h1>
+            <p class="muted">Personaliza la experiencia y protege tu progreso con copias de datos.</p>
+          </div>
+        </div>
+        <div class="settings-grid">
+          <div class="card settings-card">
+            <div class="setting-row"><div><strong>Sonido</strong><span class="muted">Victoria y feedback suave.</span></div><button class="switch" data-setting="sound" type="button" aria-label="Activar o desactivar sonido"><span></span></button></div>
+            <div class="setting-row"><div><strong>Vibración</strong><span class="muted">Feedback háptico cuando el dispositivo lo permite.</span></div><button class="switch" data-setting="vibration" type="button" aria-label="Activar o desactivar vibración"><span></span></button></div>
+            <div class="setting-row"><div><strong>Animaciones</strong><span class="muted">Transiciones y revelaciones visuales.</span></div><button class="switch" data-setting="animations" type="button" aria-label="Activar o desactivar animaciones"><span></span></button></div>
+            <div class="setting-row"><div><strong>Tema</strong><span class="muted">Oscuro por defecto; claro disponible.</span></div><select id="themeSelect"><option value="dark">Oscuro</option><option value="light">Claro</option><option value="system">Sistema</option></select></div>
+          </div>
+          <div class="card settings-card">
+            <div class="section-heading"><div><div class="eyebrow">DATOS</div><h2>Portabilidad</h2></div></div>
+            <div class="setting-actions">
+              <button class="secondary-button" id="exportButton" type="button">⇩ Exportar datos</button>
+              <button class="secondary-button" id="importButton" type="button">⇧ Importar datos</button>
+              <input id="importInput" class="sr-only" type="file" accept="application/json,.json">
+            </div>
+            <p class="microcopy">Exporta tu progreso como JSON para conservar la Pokédex, estadísticas y racha al cambiar de navegador o dispositivo.</p>
+          </div>
+          <div class="card settings-card danger-card">
+            <div class="section-heading"><div><div class="eyebrow">ZONA DE RIESGO</div><h2>Reiniciar progreso</h2></div></div>
+            <p class="muted">Se eliminarán Pokédex, historial, estadísticas y ajustes guardados en este dispositivo.</p>
+            <button class="danger-button" id="resetButton" type="button">Reiniciar progreso</button>
+          </div>
+        </div>
+      </section>
+
+      <footer class="app-footer">
+        <span>METAZOOA · taxonomy discovery</span>
+        <span id="storageStatus">Guardado local</span>
+      </footer>
+    </main>
+  </div>
+
+  <nav class="bottom-nav" id="bottomNav" aria-label="Navegación móvil">
+    <button class="nav-item is-active" data-view="game" type="button"><span>🏠</span><span>Jugar</span></button>
+    <button class="nav-item" data-view="pokedex" type="button"><span>📖</span><span>Pokédex</span></button>
+    <button class="nav-item" data-view="stats" type="button"><span>📊</span><span>Stats</span></button>
+  </nav>
+
+  <div class="modal-backdrop is-hidden" id="modalBackdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1">
+      <button class="modal-close" id="modalClose" type="button" aria-label="Cerrar">×</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <template id="attemptTemplate">
+    <article class="attempt-card">
+      <div class="attempt-head">
+        <div class="animal-mini"><span class="animal-icon" aria-hidden="true"></span><div><strong class="guess-name"></strong><span class="guess-scientific"></span></div></div>
+        <span class="proximity-badge"></span>
+      </div>
+      <div class="taxonomy-grid"></div>
+      <div class="attempt-direction"></div>
+    </article>
+  </template>
+
+  <script src="animals.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
